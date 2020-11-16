@@ -127,3 +127,9 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# vim
+*.swp
+
+# data
+CBS_k3_n100_m403_b10/*
