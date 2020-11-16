@@ -4,8 +4,9 @@ from os import path
 from timer import Timer
 
 
-__CNF_DIRECTORY__ = 'CBS_k3_n100_m403_b10'
+# __CNF_DIRECTORY__ = 'CBS_k3_n100_m403_b10'
 __CNF_FILENAME__  = 'CBS_k3_n100_m403_b10_0.cnf'
+__CNF_DIRECTORY__ = 'data'
 __VARIABLES__     = 100
 __CLAUSES__       = 403
 
