@@ -1,28 +1,13 @@
 from pyeasyga import pyeasyga
 import pycosat
-
 from os import path
-
 from timer import Timer
 
-
-
-__CNF__ = [
-    [ -1,  2,  4 ],
-    [ -2,  3,  4 ],
-    [  1, -3,  4 ],
-    [  1, -2, -4 ],
-    [  2, -3, -4 ],
-    [ -1,  3, -4 ],
-    [  1,  2,  3 ],
-    [  1,  2,  5 ]
-]
 
 __CNF_DIRECTORY__ = 'CBS_k3_n100_m403_b10'
 __CNF_FILENAME__  = 'CBS_k3_n100_m403_b10_0.cnf'
 __VARIABLES__     = 100
 __CLAUSES__       = 403
-
 
 def load_cnf():
     """
@@ -35,10 +20,15 @@ def load_cnf():
             if line[0] in ['c', 'p']:
                 continue
             splitted_line = ' '.join(line.split()).split(' ')
+            int_line = []
             for element in splitted_line:
-                element = int(element)
-            data.append(splitted_line)
+                if element == '0': continue
+                int_line.append(int(element))
+            data.append(int_line)
         return data
+
+
+__CNF__ = load_cnf()
 
 
 def _cnf_to_py(cnf, candidates):
@@ -50,6 +40,7 @@ def _cnf_to_py(cnf, candidates):
     """
     __clauses__ = []
     for clause in cnf:
+        """ 3 because its 3SAT :) """
         temp = [None] * 3
         i = 0
         for rule in clause:
@@ -63,39 +54,25 @@ def _cnf_to_py(cnf, candidates):
         __clauses__.append(temp[0] or temp[1] or temp[2])
     return sum([1 for res in __clauses__ if res])
 
-print(_cnf_to_py(__CNF__, [1, 1, 1, 0, 0]))
-
-def get_score(x1, x2, x3, x4):
-    __CLAUSES__ = [
-        ((not x1) or x2 or x4),
-        ((not x2) or x3 or x4),
-        (x1 or (not x3) or x4),
-        (x1 or (not x2) or (not x4)),
-        (x2 or (not x3) or (not x4)),
-        ((not x1) or x3 or (not x4)),
-        (x1 or x2 or x3)
-    ]
-    return sum([1 for res in __CLAUSES__ if res])
-
 
 ga = pyeasyga.GeneticAlgorithm(
-    [0, 1, 2, 3, 4],
-    mutation_probability=0.05,
+    list(range(0, __VARIABLES__)),
+    crossover_probability=0.8,
+    mutation_probability=0.5,
     population_size=200,
-    generations=100,
+    generations=500,
     elitism=True
 )
 
 
 def fitness(member, data):
-    # return get_score(member[0], member[1], member[2], member[3])
     return _cnf_to_py(__CNF__, member)
 
 
 
 def get_combinations():
     chars = '01'
-    for current in range(5):
+    for current in range(__VARIABLES__):
         a = [i for i in chars]
         for y in range(current):
             a = [x+i for i in chars for x in a]
@@ -103,7 +80,8 @@ def get_combinations():
 
 
 def brute_force():
-    for combination in get_combinations():
+    combs = get_combinations()
+    for combination in combs:
         if _cnf_to_py(__CNF__, combination) == len(__CNF__):
             return combination
     return -1
