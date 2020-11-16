@@ -1,6 +1,11 @@
 from pyeasyga import pyeasyga
-from timer import Timer
 import pycosat
+
+from os import path
+
+from timer import Timer
+
+
 
 __CNF__ = [
     [ -1,  2,  4 ],
@@ -12,6 +17,28 @@ __CNF__ = [
     [  1,  2,  3 ],
     [  1,  2,  5 ]
 ]
+
+__CNF_DIRECTORY__ = 'CBS_k3_n100_m403_b10'
+__CNF_FILENAME__  = 'CBS_k3_n100_m403_b10_0.cnf'
+__VARIABLES__     = 100
+__CLAUSES__       = 403
+
+
+def load_cnf():
+    """
+    @author Michał Łopaciuch
+    @description function that loads .cnf file and returns data as python matrix
+    """
+    data = []
+    with open(path.join(__CNF_DIRECTORY__, __CNF_FILENAME__), 'r') as f:
+        for line in f.readlines():
+            if line[0] in ['c', 'p']:
+                continue
+            splitted_line = ' '.join(line.split()).split(' ')
+            for element in splitted_line:
+                element = int(element)
+            data.append(splitted_line)
+        return data
 
 
 def _cnf_to_py(cnf, candidates):
@@ -68,7 +95,7 @@ def fitness(member, data):
 
 def get_combinations():
     chars = '01'
-    for current in range(4):
+    for current in range(5):
         a = [i for i in chars]
         for y in range(current):
             a = [x+i for i in chars for x in a]
@@ -77,12 +104,7 @@ def get_combinations():
 
 def brute_force():
     for combination in get_combinations():
-        if get_score(
-                int(combination[0]),
-                int(combination[1]),
-                int(combination[2]),
-                int(combination[3])
-                ) == len(__CNF__):
+        if _cnf_to_py(__CNF__, combination) == len(__CNF__):
             return combination
     return -1
 
